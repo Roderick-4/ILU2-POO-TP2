@@ -1,6 +1,7 @@
 package frontiere;
 
 import controleur.ControlAcheterProduit;
+import personnages.Gaulois;
 
 public class BoundaryAcheterProduit {
 	private ControlAcheterProduit controlAcheterProduit;
@@ -10,6 +11,52 @@ public class BoundaryAcheterProduit {
 	}
 
 	public void acheterProduit(String nomAcheteur) {
-		// TODO à completer
+		if (!controlAcheterProduit.verifierIdentite(nomAcheteur)) {
+			System.out.println("Je suis désolée " + nomAcheteur
+					+ " il faut être un habitant de notre village pour commercer ici.");
+		} else {
+			StringBuilder phrase = new StringBuilder();
+			phrase.append("Quel produit voulez-vous acheter ?\n");
+			String produit = Clavier.entrerChaine(phrase.toString());
+			phrase.delete(0, phrase.length());
+			Gaulois[] listeVendeur = controlAcheterProduit.getVendeurs(produit);
+
+			if (listeVendeur == null) {
+				System.out.println("Desole, personne ne vend ce produit au marche.");
+			} else {
+				phrase.append("Chez quel marchand souhaitez vous acheter des " + produit + "?\n");
+				for (int i = 0; i < listeVendeur.length; i++) {
+					phrase.append(i + 1).append("-").append(listeVendeur[0].getNom()).append("\n");
+				}
+				int idVendeur = -1;
+				do {
+					idVendeur = Clavier.entrerEntier(phrase.toString()) - 1;
+					phrase.delete(0, phrase.length());
+					if (idVendeur < 0 || idVendeur > listeVendeur.length) {
+						System.out.println("Veuillez rentrer un numero valide");
+					}
+				} while (idVendeur < 0 || idVendeur > listeVendeur.length);
+
+				phrase.append(
+						nomAcheteur + "se déplace jusqu'à l'étal du vendeur" + listeVendeur[idVendeur].getNom() + "\n");
+				phrase.append("Bonjour " + nomAcheteur + "\n");
+				phrase.append("Combien de " + produit + " voulez vous acheter ?\n");
+				int quantite = Clavier.entrerEntier(phrase.toString());
+				phrase.delete(0, phrase.length());
+				int nbAchat = controlAcheterProduit.acheterProduit(listeVendeur[idVendeur].getNom(), quantite);
+
+				if (nbAchat == quantite) {
+					System.out.println(nomAcheteur + " achete " + quantite + " " + produit + " a "
+							+ listeVendeur[idVendeur].getNom());
+				} else if (nbAchat == 0) {
+					System.out.println(nomAcheteur + " veut acheter " + quantite + " " + produit
+							+ ", malheureusement il n'y en a plus.");
+				} else {
+					System.out.println(nomAcheteur + " veut acheter " + quantite + " " + produit + ", malheureusement "
+							+ listeVendeur[idVendeur].getNom() + "n'en a plus que " + nbAchat + ". " + nomAcheteur
+							+ " achete tout le stock de " + listeVendeur[idVendeur].getNom());
+				}
+			}
+		}
 	}
 }
